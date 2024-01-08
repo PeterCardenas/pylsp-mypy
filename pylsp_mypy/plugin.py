@@ -303,13 +303,26 @@ def get_diagnostics(
     if not dmypy:
         args.extend(["--incremental", "--follow-imports", "silent"])
         args = apply_overrides(args, overrides)
+        venv_path = settings.get("venv_path", None)
+        relative_mypy_path = settings.get("relative_mypy_path", None)
+        env_variables: Dict[str, str] = {}
+        mypy_command = shutil.which("mypy")
+        if venv_path:
+            mypy_command = os.path.join(venv_path, "bin", "mypy")
+            env_variables["VIRTUAL_ENV"] = venv_path
+        if relative_mypy_path:
+            env_variables["MYPYPATH"] = os.path.join(workspace.root_path, relative_mypy_path)
 
-        if shutil.which("mypy"):
+        if mypy_command:
             # mypy exists on path
             # -> use mypy on path
             log.info("executing mypy args = %s on path", args)
             completed_process = subprocess.run(
-                ["mypy", *args], capture_output=True, **windows_flag, encoding="utf-8"
+                args=[mypy_command, *args],
+                capture_output=True,
+                **windows_flag,
+                encoding="utf-8",
+                env=env_variables,
             )
             report = completed_process.stdout
             errors = completed_process.stderr
