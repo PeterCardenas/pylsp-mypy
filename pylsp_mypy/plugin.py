@@ -6,6 +6,7 @@ Created on Fri Jul 10 09:53:57 2020
 
 @author: Richard Kellnberger
 """
+from __future__ import annotations
 import ast
 import atexit
 import collections
@@ -305,7 +306,7 @@ def get_diagnostics(
         args = apply_overrides(args, overrides)
         venv_path = settings.get("venv_path", None)
         relative_mypy_path = settings.get("relative_mypy_path", None)
-        env_variables: Dict[str, str] = {}
+        env_variables: dict[str, str] = { 'COLUMNS': '1000' }
         mypy_command = shutil.which("mypy")
         if venv_path:
             mypy_command = os.path.join(venv_path, "bin", "mypy")
