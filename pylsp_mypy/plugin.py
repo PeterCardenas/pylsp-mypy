@@ -305,14 +305,15 @@ def get_diagnostics(
         args.extend(["--incremental", "--follow-imports", "silent"])
         args = apply_overrides(args, overrides)
         venv_path = settings.get("venv_path", None)
-        relative_mypy_path = settings.get("relative_mypy_path", None)
+        extra_paths = settings.get("extra_paths", None)
         env_variables: dict[str, str] = { 'COLUMNS': '1000' }
         mypy_command = shutil.which("mypy")
         if venv_path:
             mypy_command = os.path.join(venv_path, "bin", "mypy")
             env_variables["VIRTUAL_ENV"] = venv_path
-        if relative_mypy_path:
-            env_variables["MYPYPATH"] = os.path.join(workspace.root_path, relative_mypy_path)
+        if extra_paths:
+            mypy_paths = [os.path.join(workspace.root_path, extra_path) for extra_path in extra_paths]
+            env_variables["MYPYPATH"] = os.pathsep.join(mypy_paths)
 
         if mypy_command:
             # mypy exists on path
